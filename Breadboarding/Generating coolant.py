@@ -20,9 +20,10 @@ Cd = 1 #discharge coeff (might be changed)
 P_initial = 1e5 #Initial pressure inside the vessel  
 P_outside = 1e5 #PRessure outside the vessel 
 Ti = 293 #initial temperature inside the vessel
+T_prod = 20 #temperature of the coolant
 rhoi = P_initial/(R*Ti) #initial density inside the vessel
 
-Q_prod = 7.3e-3 #Mass flow rate of the coolant gas, put 0 if none 
+Q_prod = 7.3e-2 #Mass flow rate of the coolant gas, put 0 if none 
 
 "Defined Constant"
 
@@ -43,7 +44,7 @@ def Vessel_decompression(P_initial, P_outside):
     rho = [rhoi] 
     T = [Ti]
    
-    #3/dt was chosen in order to have all the graph on the same timescale    
+    #3/dt was chosen in order to have all the graph on the same timescale "should be changed"  
     while len(t) < 3/dt  :
     
         if P[-1] >= P_limite :
@@ -56,8 +57,12 @@ def Vessel_decompression(P_initial, P_outside):
             P_i = P[-1]*(rho[-1]/rho[-2])**n
             P.append(P_i)
             
+            #itermediate value
+            D = (rho[-1]*V+Q_prod*dt)
+            
+            
             #calculation of new T 
-            T_i = P[-1]/(rho[-1]*R)
+            T_i = P[-1]/(rho[-1]*R)*(rho[-1]*V/D) + T_prod*Q_prod*dt/D
             T.append(T_i)
             
             t.append(t[-1]+dt) 
@@ -78,8 +83,11 @@ def Vessel_decompression(P_initial, P_outside):
             P_i = P[-1]*(rho[-1]/rho[-2])**n
             P.append(max(P_i, P_outside))
             
+            #itermediate value
+            D = (rho[-1]*V+Q_prod*dt)
+            
             #calculation of new T 
-            T_i = P[-1]/(rho[-1]*R)
+            T_i = P[-1]/(rho[-1]*R)*(rho[-1]*V/D) + T_prod*Q_prod*dt/D
             T.append(T_i)
             
             
@@ -92,14 +100,14 @@ def Vessel_decompression(P_initial, P_outside):
     plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
     
     #is used to produce a csv file, can be removed 
-    folder = "coolant_produced/coolant_d{}.csv".format(d*1000)
+    """folder = "coolant_produced/coolant_d{}.csv".format(d*1000)
     with open(folder, mode='w', newline='') as fichier_csv:
         writer = csv.writer(fichier_csv)
         # Écrire l'en-tête (facultatif, mais utile pour référence)
         writer.writerow(['x_value', 'y_value'])
         # Écrire les données ligne par ligne
         for x, y in zip(t, P):
-            writer.writerow([x, y])
+            writer.writerow([x, y])"""
     
     return()
 
